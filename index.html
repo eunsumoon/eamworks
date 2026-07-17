@@ -41,9 +41,9 @@
       overflow: hidden;
     }
 
-    /* 전체 레이아웃: 중앙 콘텐츠 + 하단 푸터 */
+    /* 전체 레이아웃: 화면 최상단~이메일칸 사이의 중앙에 콘텐츠 배치 */
     .page {
-      height: 100dvh;
+      height: calc(100dvh - 120px); /* 하단 폼 영역을 제외한 높이 */
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -60,7 +60,7 @@
     }
 
     .logo {
-      width: min(340px, 72vw);
+      width: min(240px, 60vw);
       height: auto;
     }
 
@@ -153,6 +153,10 @@
     @media (max-width: 480px) {
       .notify-form {
         flex-direction: column;
+      }
+
+      .page {
+        height: calc(100dvh - 180px); /* 세로로 쌓인 폼 높이만큼 제외 */
       }
     }
   </style>
