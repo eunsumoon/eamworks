@@ -50,8 +50,9 @@
       object-fit: cover;
       z-index: -2;
       transition: opacity 0.8s linear;
-      /* 영상 밝기 보정 */
-      filter: brightness(1.2);
+      /* 밝기 보정 + 블러로 뽀얀 느낌; scale은 블러로 흐려진 가장자리를 화면 밖으로 밀어냄 */
+      filter: brightness(1.2) blur(12px);
+      transform: scale(1.06);
     }
 
     /* 영상 위 밝은 오버레이 (밝은 톤 + 어두운 글자 가독성용) */
