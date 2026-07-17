@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EAM WORKS</title>
+  <meta name="description" content="Great things coming soon." />
+
+  <!-- Open Graph (링크 공유 시 미리보기) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="EAM WORKS" />
+  <meta property="og:description" content="Great things coming soon." />
+  <meta property="og:image" content="og-image.png" />
+
+  <!-- Twitter 카드 -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="EAM WORKS" />
+  <meta name="twitter:description" content="Great things coming soon." />
+  <meta name="twitter:image" content="og-image.png" />
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <!-- Brandon Grotesque (Adobe Fonts) -->
+  <link rel="stylesheet" href="https://use.typekit.net/epu2yts.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: "brandon-grotesque", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-weight: 500;
+      color: #fff;
+      background: #0a0a0a;
+      overflow: hidden;
+    }
+
+    /* 배경 영상 (두 개를 겹쳐서 루프 지점을 크로스페이드) */
+    .bg-video {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      transition: opacity 0.8s linear;
+    }
+
+    /* 영상 위 어두운 오버레이 (글자 가독성용) */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: -1;
+    }
+
+    /* 전체 레이아웃: 중앙 콘텐츠 + 하단 푸터 */
+    .page {
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      text-align: center;
+    }
+
+    .logo {
+      width: min(340px, 72vw);
+      height: auto;
+      /* 어두운 로고를 흰색으로 반전 (영상 배경 가독성용) */
+      filter: brightness(0) invert(1);
+    }
+
+    .tagline {
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      opacity: 0.9;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 28px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <!-- 배경 영상: 두 개를 번갈아 재생해 루프 지점을 부드럽게 연결 -->
+  <video class="bg-video" id="bgA" src="video.mp4" autoplay muted loop playsinline preload="auto"></video>
+  <video class="bg-video" id="bgB" src="video.mp4" muted loop playsinline preload="auto" style="opacity: 0"></video>
+  <div class="overlay"></div>
+
+  <main class="page">
+    <div class="center">
+      <!-- 로고: logo.svg 파일을 이 폴더에 넣으면 교체됩니다 -->
+      <img class="logo" src="logo.svg" alt="Eam Works" />
+      <p class="tagline">Great things coming soon.</p>
+    </div>
+  </main>
+
+  <footer>
+    <span id="year"></span> © Eam Works
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // 루프 크로스페이드: 영상이 끝나기 직전에 대기 중인 영상을 처음부터
+    // 재생하며 서서히 교차시켜 되감기 순간의 끊김을 감춘다.
+    (function () {
+      var FADE = 0.8; // 초 (CSS transition 시간과 동일)
+      var front = document.getElementById("bgA");
+      var back = document.getElementById("bgB");
+      var fading = false;
+
+      function tick() {
+        if (!fading && front.duration && front.currentTime > front.duration - FADE) {
+          fading = true;
+          back.currentTime = 0;
+          var p = back.play();
+          if (p && p.then) {
+            p.then(startFade).catch(function () {
+              // 재생이 차단되면 기본 loop 재생으로 폴백
+              fading = false;
+            });
+          } else {
+            startFade();
+          }
+        }
+        requestAnimationFrame(tick);
+      }
+
+      function startFade() {
+        back.style.opacity = 1;
+        front.style.opacity = 0;
+        setTimeout(function () {
+          front.pause();
+          var t = front;
+          front = back;
+          back = t;
+          fading = false;
+        }, FADE * 1000);
+      }
+
+      requestAnimationFrame(tick);
+    })();
+  </script>
+</body>
+</html>
