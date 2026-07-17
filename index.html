@@ -37,30 +37,8 @@
       font-family: "brandon-grotesque", "Helvetica Neue", Helvetica, Arial, sans-serif;
       font-weight: 500;
       color: #21242A;
-      background: #f4f4f2;
+      background: #FFFAF0;
       overflow: hidden;
-    }
-
-    /* 배경 영상 (두 개를 겹쳐서 루프 지점을 크로스페이드) */
-    .bg-video {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -2;
-      transition: opacity 0.8s linear;
-      /* 밝기 보정 + 블러로 뽀얀 느낌; scale은 블러로 흐려진 가장자리를 화면 밖으로 밀어냄 */
-      filter: brightness(1.2) blur(12px);
-      transform: scale(1.06);
-    }
-
-    /* 영상 위 밝은 오버레이 (밝은 톤 + 어두운 글자 가독성용) */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(255, 255, 255, 0.4);
-      z-index: -1;
     }
 
     /* 전체 레이아웃: 중앙 콘텐츠 + 하단 푸터 */
@@ -93,6 +71,61 @@
       opacity: 0.9;
     }
 
+    /* 이메일 입력 폼 */
+    .notify-form {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      width: min(420px, 85vw);
+    }
+
+    .notify-form input {
+      flex: 1;
+      min-width: 0;
+      font-family: inherit;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: #21242A;
+      background: transparent;
+      border: 1px solid rgba(33, 36, 42, 0.35);
+      border-radius: 6px;
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .notify-form input::placeholder {
+      color: rgba(33, 36, 42, 0.45);
+    }
+
+    .notify-form input:focus {
+      border-color: #21242A;
+    }
+
+    .notify-form button {
+      font-family: inherit;
+      font-weight: 500;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      color: #FFFAF0;
+      background: #21242A;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 22px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .notify-form button:hover {
+      opacity: 0.85;
+    }
+
+    .form-message {
+      font-size: 0.85rem;
+      min-height: 1.2em;
+      opacity: 0.75;
+    }
+
     footer {
       position: fixed;
       bottom: 28px;
@@ -104,19 +137,26 @@
       letter-spacing: 0.08em;
       opacity: 0.7;
     }
+
+    /* 모바일: 입력칸과 버튼을 세로로 */
+    @media (max-width: 480px) {
+      .notify-form {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- 배경 영상: 두 개를 번갈아 재생해 루프 지점을 부드럽게 연결 -->
-  <video class="bg-video" id="bgA" src="video.mp4" autoplay muted loop playsinline preload="auto"></video>
-  <video class="bg-video" id="bgB" src="video.mp4" muted loop playsinline preload="auto" style="opacity: 0"></video>
-  <div class="overlay"></div>
-
   <main class="page">
     <div class="center">
-      <!-- 로고: logo.svg 파일을 이 폴더에 넣으면 교체됩니다 -->
       <img class="logo" src="logo.svg" alt="Eam Works" />
       <p class="tagline">Great things coming soon.</p>
+
+      <form class="notify-form" id="notifyForm">
+        <input type="email" name="email" id="emailInput" placeholder="Your email address" required autocomplete="email" />
+        <button type="submit">Notify Me</button>
+      </form>
+      <p class="form-message" id="formMessage"></p>
     </div>
   </main>
 
@@ -127,45 +167,48 @@
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
 
-    // 루프 크로스페이드: 영상이 끝나기 직전에 대기 중인 영상을 처음부터
-    // 재생하며 서서히 교차시켜 되감기 순간의 끊김을 감춘다.
-    (function () {
-      var FADE = 0.8; // 초 (CSS transition 시간과 동일)
-      var front = document.getElementById("bgA");
-      var back = document.getElementById("bgB");
-      var fading = false;
+    // Web3Forms 이메일 수집
+    var ACCESS_KEY = "YOUR_WEB3FORMS_ACCESS_KEY"; // web3forms.com에서 발급받은 키로 교체
+    var form = document.getElementById("notifyForm");
+    var message = document.getElementById("formMessage");
 
-      function tick() {
-        if (!fading && front.duration && front.currentTime > front.duration - FADE) {
-          fading = true;
-          back.currentTime = 0;
-          var p = back.play();
-          if (p && p.then) {
-            p.then(startFade).catch(function () {
-              // 재생이 차단되면 기본 loop 재생으로 폴백
-              fading = false;
-            });
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      if (ACCESS_KEY === "YOUR_WEB3FORMS_ACCESS_KEY") {
+        message.textContent = "Sign-up opens soon — please check back!";
+        return;
+      }
+
+      var button = form.querySelector("button");
+      button.disabled = true;
+      message.textContent = "";
+
+      fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: ACCESS_KEY,
+          subject: "New sign-up — eam.works",
+          email: document.getElementById("emailInput").value
+        })
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data.success) {
+            form.reset();
+            message.textContent = "Thank you! We'll keep you posted.";
           } else {
-            startFade();
+            message.textContent = "Something went wrong. Please try again.";
           }
-        }
-        requestAnimationFrame(tick);
-      }
-
-      function startFade() {
-        back.style.opacity = 1;
-        front.style.opacity = 0;
-        setTimeout(function () {
-          front.pause();
-          var t = front;
-          front = back;
-          back = t;
-          fading = false;
-        }, FADE * 1000);
-      }
-
-      requestAnimationFrame(tick);
-    })();
+        })
+        .catch(function () {
+          message.textContent = "Something went wrong. Please try again.";
+        })
+        .finally(function () {
+          button.disabled = false;
+        });
+    });
   </script>
 </body>
 </html>
