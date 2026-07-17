@@ -36,8 +36,8 @@
     body {
       font-family: "brandon-grotesque", "Helvetica Neue", Helvetica, Arial, sans-serif;
       font-weight: 500;
-      color: #fff;
-      background: #0a0a0a;
+      color: #21242A;
+      background: #f4f4f2;
       overflow: hidden;
     }
 
@@ -50,13 +50,15 @@
       object-fit: cover;
       z-index: -2;
       transition: opacity 0.8s linear;
+      /* 영상 밝기 보정 */
+      filter: brightness(1.2);
     }
 
-    /* 영상 위 어두운 오버레이 (글자 가독성용) */
+    /* 영상 위 밝은 오버레이 (밝은 톤 + 어두운 글자 가독성용) */
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.45);
+      background: rgba(255, 255, 255, 0.4);
       z-index: -1;
     }
 
@@ -81,8 +83,6 @@
     .logo {
       width: min(340px, 72vw);
       height: auto;
-      /* 어두운 로고를 흰색으로 반전 (영상 배경 가독성용) */
-      filter: brightness(0) invert(1);
     }
 
     .tagline {
